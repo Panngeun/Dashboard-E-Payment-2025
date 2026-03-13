@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>E-Payment Dashboard 2025 – Lao PDR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+#app{max-width:1600px;margin:0 auto;padding:18px}
+
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding:15px 22px;
+  background:linear-gradient(135deg,#1e2535,#252b3b);border-radius:14px;border:1px solid rgba(255,255,255,.06)}
+.header h1{font-size:1.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:.76rem;color:#64748b;margin-top:2px}
+.hbadge{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);
+  color:#60a5fa;padding:4px 13px;border-radius:20px;font-size:.72rem;font-weight:600}
+
+.ctrl{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px;align-items:center}
+.bgrp{display:flex;background:#1a2033;border-radius:9px;padding:3px;gap:3px}
+.btn{padding:6px 16px;border:none;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:600;
+  transition:all .18s;color:#94a3b8;background:transparent}
+.btn.active-blue{background:#3b82f6;color:#fff;box-shadow:0 2px 10px rgba(59,130,246,.4)}
+.btn.active-purple{background:#8b5cf6;color:#fff;box-shadow:0 2px 10px rgba(139,92,246,.4)}
+.btn.active-amber{background:#f59e0b;color:#000;box-shadow:0 2px 10px rgba(245,158,11,.4)}
+.btn:hover:not(.active-blue):not(.active-purple):not(.active-amber){color:#e2e8f0;background:rgba(255,255,255,.06)}
+
+.mfilt{display:flex;gap:5px;flex-wrap:wrap}
+.mpill{padding:5px 10px;border-radius:18px;cursor:pointer;font-size:.73rem;font-weight:700;
+  border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;transition:all .18s;user-select:none}
+.mpill:hover{border-color:rgba(255,255,255,.22);color:#94a3b8}
+.mpill.sel-a{background:#3b82f6;color:#fff;border-color:#3b82f6;box-shadow:0 0 8px rgba(59,130,246,.5)}
+.mpill.sel-b{background:#f59e0b;color:#000;border-color:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.5)}
+
+.hint{font-size:.7rem;color:#475569;padding:5px 11px;background:#1a2033;border-radius:8px;
+  border:1px solid rgba(255,255,255,.05);white-space:nowrap}
+
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:11px;margin-bottom:16px}
+.kcard{background:#1e2535;border-radius:13px;padding:14px;border:1px solid rgba(255,255,255,.06);
+  transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;inset:0;border-radius:13px;
+  background:linear-gradient(135deg,rgba(255,255,255,.03),transparent);pointer-events:none}
+.kcard:hover{transform:translateY(-3px);box-shadow:0 8px 26px rgba(0,0,0,.4);border-color:rgba(255,255,255,.11)}
+.kcard.tot{grid-column:1/-1;background:linear-gradient(135deg,#1e3a5f,#1e2535);border-color:rgba(59,130,246,.2)}
+.kicon{font-size:1.45rem;margin-bottom:6px}
+.kflags{font-size:1.1rem;margin-bottom:5px;letter-spacing:-2px}
+.kname{font-size:.68rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kval{font-size:1.3rem;font-weight:800;color:#e2e8f0;line-height:1.1}
+.kcard.tot .kval{font-size:1.85rem;color:#60a5fa}
+.cmp-row{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap}
+.cmp-blk{flex:1;min-width:75px;background:rgba(0,0,0,.2);border-radius:7px;padding:6px 8px}
+.cmp-m{font-size:.62rem;font-weight:700;margin-bottom:2px}
+.cmp-v{font-size:.9rem;font-weight:800}
+.ca{color:#60a5fa}.cb{color:#fbbf24}
+.dbadge{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:18px;
+  font-size:.7rem;font-weight:700;margin-top:6px}
+.dup{background:rgba(16,185,129,.15);color:#10b981}
+.ddn{background:rgba(239,68,68,.15);color:#ef4444}
+.dneu{background:rgba(148,163,184,.1);color:#64748b}
+
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:13px;margin-bottom:16px}
+.cc{background:#1e2535;border-radius:13px;padding:16px;border:1px solid rgba(255,255,255,.06)}
+.ctitle{font-size:.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+.slabel{font-size:.68rem;font-weight:700;color:#475569;text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:8px;padding-left:2px}
+.io-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:11px;margin-bottom:16px}
+.iocard{background:#1e2535;border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.06);transition:all .2s}
+.iocard:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.3)}
+.iohdr{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.ioflags{font-size:1.1rem;letter-spacing:-2px}
+.ioname{font-size:.74rem;font-weight:700;color:#e2e8f0}
+.iorow{display:flex;justify-content:space-between;align-items:center;padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.iorow:last-child{border-bottom:none}
+.iolabel{font-size:.66rem;color:#64748b;font-weight:600}
+.ionum{font-size:.78rem;font-weight:700}
+.cblue{color:#60a5fa}.cgreen{color:#10b981}.camber{color:#f59e0b}
+
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px}
+.dcard{background:#1e2535;border-radius:11px;padding:12px;border:1px solid rgba(255,255,255,.06);transition:all .2s}
+.dcard:hover{transform:translateY(-2px)}
+.dbrand{font-size:.74rem;font-weight:800;margin-bottom:5px}
+.dval{font-size:1rem;font-weight:700;color:#e2e8f0}
+.dsub{font-size:.66rem;color:#64748b;margin-top:2px}
+
+/* ── IO MoM chart section ── */
+.io-mom-section{margin-top:20px}
+.corr-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.cpill{padding:5px 13px;border-radius:18px;cursor:pointer;font-size:.74rem;font-weight:700;
+  border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;transition:all .18s}
+.cpill.active{background:#10b981;color:#fff;border-color:#10b981;box-shadow:0 0 10px rgba(16,185,129,.3)}
+.cpill:hover:not(.active){background:rgba(16,185,129,.1);color:#10b981;border-color:rgba(16,185,129,.3)}
+.io-mom-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:12px}
+.iomcard{background:#1e2535;border-radius:10px;padding:11px;border:1px solid rgba(255,255,255,.06);text-align:center}
+.iomcard:hover{border-color:rgba(255,255,255,.12)}
+.iomm{font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:5px}
+.iom-in{font-size:.82rem;font-weight:700;color:#10b981}
+.iom-out{font-size:.82rem;font-weight:700;color:#f59e0b}
+.iom-net{font-size:.72rem;font-weight:600;margin-top:3px}
+.net-pos{color:#a78bfa}.net-neg{color:#ef4444}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0f1117}
+::-webkit-scrollbar-thumb{background:#2d3748;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div class="header">
+  <div><h1>🇱🇦 E-Payment Dashboard</h1>
+    <p>Lao PDR Electronic Payment System &nbsp;•&nbsp; Fiscal Year 2025</p></div>
+  <div class="hbadge">Year 2025</div>
+</div>
+
+<!-- Controls row 1: tabs + metric + mode -->
+<div class="ctrl">
+  <div class="bgrp">
+    <button class="btn active-blue" id="tab-domestic"    onclick="setTab('domestic')">🏦 Domestic</button>
+    <button class="btn"             id="tab-crossborder" onclick="setTab('crossborder')">✈️ Cross-Border</button>
+  </div>
+  <div class="bgrp">
+    <button class="btn active-purple" id="metric-vol"   onclick="setMetric('vol')">📊 Transaction Count</button>
+    <button class="btn"               id="metric-value" onclick="setMetric('value')">💰 Value (LAK)</button>
+  </div>
+  <div class="bgrp">
+    <button class="btn"             id="mode-single"  onclick="setMode('single')">Single Month</button>
+    <button class="btn active-amber" id="mode-compare" onclick="setMode('compare')">⚡ Compare</button>
+  </div>
+  <div class="hint"><span id="hint-text">Click 2 months · <span style="color:#60a5fa">Blue</span>=A &nbsp;<span style="color:#fbbf24">Gold</span>=B</span></div>
+</div>
+
+<!-- Controls row 2: month pills -->
+<div class="ctrl" style="margin-bottom:16px">
+  <div class="mfilt" id="month-filter"></div>
+</div>
+
+<div id="kgrid" class="kgrid"></div>
+
+<div class="charts-row">
+  <div class="cc">
+    <div class="ctitle" id="main-chart-title">Monthly Trend</div>
+    <div style="position:relative;height:290px"><canvas id="mainChart"></canvas></div>
+  </div>
+  <div class="cc">
+    <div class="ctitle" id="donut-title">Breakdown</div>
+    <div style="position:relative;height:290px"><canvas id="donutChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Cross-border section -->
+<div id="cb-extra" style="display:none">
+  <div class="slabel">Inbound / Outbound Summary</div>
+  <div id="io-grid" class="io-grid"></div>
+  <div class="slabel" style="margin-top:14px">Direct Inbound (Alipay · WeChat · GLN)</div>
+  <div id="direct-grid" class="dg"></div>
+
+  <!-- ─── NEW: Inbound vs Outbound MoM ─── -->
+  <div class="io-mom-section">
+    <div class="slabel" style="margin-top:18px">📈 Inbound vs Outbound — Month by Month</div>
+    <!-- Corridor selector -->
+    <div class="corr-pills" id="corr-pills">
+      <button class="cpill active" id="cp-all" onclick="setCorridor('all')">🌐 All Corridors</button>
+      <button class="cpill" id="cp-0" onclick="setCorridor(0)">🇱🇦🇹🇭 Thailand</button>
+      <button class="cpill" id="cp-1" onclick="setCorridor(1)">🇱🇦🇻🇳 Vietnam</button>
+      <button class="cpill" id="cp-2" onclick="setCorridor(2)">🇱🇦🇨🇳 China</button>
+      <button class="cpill" id="cp-3" onclick="setCorridor(3)">🇱🇦🇰🇭 Cambodia</button>
+    </div>
+    <!-- Mini stat cards (one per month) -->
+    <div id="io-mom-cards" class="io-mom-cards"></div>
+    <!-- Big chart -->
+    <div class="cc">
+      <div style="position:relative;height:320px"><canvas id="ioChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<script>
+const D={"months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "domestic": {"total": {"vol": [78868119.0, 79163406.0, 84507310.0, 227276144.78, 91436961.0, 163499117.0, 136200473.0, 138517973.0, 77852049.0, 108001606.0, 107196492.0, 113938212.0], "value": [312952998258040.2, 308686484206949.25, 305312861848010.0, 299701403899297.0, 362845960022349.8, 663544906852956.1, 753628009514003.0, 662545088346970.5, 368879717715310.8, 292631153027241.3, 358651430603926.7, 329033194295649.6]}, "categories": [{"name": "Mobile Banking", "icon": "\ud83d\udcf1", "color": "#3b82f6", "vol": [65871375.0, 66664913.0, 69901735.0, 198332216.07, 75227374.0, 144673508.0, 116363122.0, 119428640.0, 60054104.0, 88825143.0, 87419383.0, 93069395.0], "value": [227455602930473.1, 225291982324102.53, 223310075057533.03, 222239413087064.25, 282816548455509.2, 556367738621094.94, 642477765307768.8, 558869762498865.4, 311976578411543.1, 231534532172754.62, 268422494174827.44, 230056572039301.4]}, {"name": "Internet Banking", "icon": "\ud83d\udcbb", "color": "#10b981", "vol": [776363.0, 829730.0, 821673.0, 14300540.71, 870276.0, 1596906.0, 1725304.0, 1739180.0, 899912.0, 884783.0, 897669.0, 962476.0], "value": [54496442204684.05, 58150618074335.9, 52484074063943.65, 49558855278549.18, 55970350171176.48, 106910815894643.75, 110841945404567.75, 103444372589834.2, 56687438791792.2, 60879666204161.3, 56726193453936.44, 65877357406017.81]}, {"name": "E-wallet", "icon": "\ud83d\udc5b", "color": "#8b5cf6", "vol": [null, null, null, 1090508.0, 1147032.0, 2294064.0, 2457102.0, null, null, null, null, null], "value": [null, null, null, 16714307178.0, 17426651872.0, 34853303744.0, 83984500020.0, null, null, null, null, null]}, {"name": "LAPS", "icon": "\ud83c\udfe7", "color": "#f59e0b", "vol": [406718.0, 361198.0, 365848.0, 228719.0, 207010.0, 202065.0, 197110.0, 209135.0, 194215.0, 193764.0, 227619.0, 263249.0], "value": [290128282410.98, 261936724535.43, 222909966258.06, 262820968999.05, 231015128071.41, 229347937078.76, 221983347518.7, 226412958348.0, 213145882709.0, 214042476831.8, 201502804865.69, 244003013891.47]}, {"name": "LMPS", "icon": "\ud83d\udd04", "color": "#ef4444", "vol": [11813663.0, 11307565.0, 13418054.0, 13324161.0, 13985269.0, 14732574.0, 15457835.0, 17141018.0, 16703818.0, 18097916.0, 18651821.0, 19643092.0], "value": [30710824840472.05, 24981947083975.36, 29295802760275.26, 27623600257506.5, 23810619615720.69, 2151096394.6, 2330954127.72, 4540299922.87, 2554629266.47, 2912173493.54, 33301240170297.12, 32855261836438.89]}]}, "cross_border": {"total": {"vol": [22469.0, 21863.0, 30719.0, 31202.0, 37058.0, 44951.0, 75761.0, 101508.0, 87326.0, 87326.0, 87747.0, 187226.0], "value": [14881932433.31, 14581501347.72, 24537359297.82, 24953496277.43, 24873931502.23, 40641238917.09, 43776938892.53, 74643036513.23, 72024101421.79, 72024101421.79, 81889663621.45, 97872117016.4]}, "corridors": [{"name": "Laos\u2013Thailand", "flags": "\ud83c\uddf1\ud83c\udde6\ud83c\uddf9\ud83c\udded", "color": "#3b82f6", "vol": [21033.0, 20296.0, 25569.0, 23831.0, 29766.0, 37311.0, 67777.0, 92887.0, 79517.0, 79517.0, 79517.0, 167194.0], "value": [14395619166.53, 14260541637.03, 18139032064.47, 15690180632.6, 18454636636.96, 23221663667.93, 37955093065.6, 66049725774.79, 63094700109.14, 63094700109.14, 52459796643.81, 81826723662.24], "out_vol": [18845.0, 17726.0, 22122.0, 19287.0, 20031.0, 21667.0, 36952.0, 51312.0, 48662.0, 48662.0, 48662.0, 60800.0], "out_value": [13778736242.78, 13501483753.53, 16643599148.52, 13767006600.37, 14485463852.96, 15272856465.96, 26910365179.65, 35471472939.29, 34276376571.82, 34276376571.82, 38846282166.81, 44278411392.96], "in_vol": [2188.0, 2570.0, 3447.0, 4544.0, 9735.0, 15644.0, 30825.0, 41575.0, 30855.0, 30855.0, 30855.0, 106394.0], "in_value": [616882923.75, 759057883.5, 1495432915.95, 1923174032.23, 3969172784.0, 7948807201.97, 11044727885.95, 30578252835.5, 28818323537.32, 28818323537.32, 13613514477.0, 37548312269.28]}, {"name": "Laos\u2013Vietnam", "flags": "\ud83c\uddf1\ud83c\udde6\ud83c\uddfb\ud83c\uddf3", "color": "#10b981", "vol": [534.0, 407.0, 392.0, 490.0, 1000.0, 356.0, 540.0, 638.0, 575.0, 575.0, 575.0, 1240.0], "value": [277069082.88, 167070859.0, 229199054.0, 503805629.0, 627356000.0, 191445028.0, 191739496.9, 491232443.52, 250606771.8, 250606771.8, 788148056.0, 539877398.0], "out_vol": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "out_value": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "in_vol": [534.0, 407.0, 392.0, 490.0, 1000.0, 356.0, 540.0, 638.0, 575.0, 575.0, 575.0, 1240.0], "in_value": [277069082.88, 167070859.0, 229199054.0, 503805629.0, 627356000.0, 191445028.0, 191739496.9, 491232443.52, 250606771.8, 250606771.8, 788148056.0, 539877398.0]}, {"name": "Laos\u2013China", "flags": "\ud83c\uddf1\ud83c\udde6\ud83c\udde8\ud83c\uddf3", "color": "#ef4444", "vol": [456.0, 847.0, 4320.0, 6341.0, 5641.0, 6745.0, 6669.0, 7303.0, 6424.0, 6424.0, 6425.0, 17624.0], "value": [10015751.9, 24087203.57, 5973304546.08, 8521546702.03, 5515802840.29, 16991594876.9, 5369884987.88, 7700120370.46, 8063905249.86, 8063905249.86, 27843345410.45, 14798762943.53], "out_vol": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0], "out_value": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null], "in_vol": [456.0, 847.0, 4320.0, 6341.0, 5641.0, 6745.0, 6669.0, 7303.0, 6424.0, 6424.0, 6424.0, 17622.0], "in_value": [10015751.9, 24087203.57, 5973304546.08, 8521546702.03, 5515802840.29, 16991594876.9, 5369884987.88, 7700120370.46, 8063905249.86, 8063905249.86, 27843345410.45, 14798762943.53]}, {"name": "Laos\u2013Cambodia", "flags": "\ud83c\uddf1\ud83c\udde6\ud83c\uddf0\ud83c\udded", "color": "#f59e0b", "vol": [446.0, 313.0, 438.0, 540.0, 651.0, 539.0, 775.0, 680.0, 810.0, 810.0, 1230.0, 1168.0], "value": [199228432.0, 129801648.12, 195823633.27, 237963313.8, 276136024.98, 236535344.26, 260221342.15, 401957924.46, 614889290.99, 614889290.99, 798373511.19, 706753012.62], "out_vol": [5.0, 3.0, 19.0, 83.0, 28.0, 69.0, 136.0, 111.0, 233.0, 233.0, 141.0, 176.0], "out_value": [4515864.0, 80489.12, 432295.27, 15972673.8, 6392159.98, 16326557.26, 33778443.15, 38750994.46, 27990869.99, 27990869.99, 74840580.19, 93985267.62], "in_vol": [441.0, 310.0, 419.0, 457.0, 623.0, 470.0, 639.0, 569.0, 577.0, 577.0, 1089.0, 992.0], "in_value": [194712568.0, 129721159.0, 195391338.0, 221990640.0, 269743865.0, 220208787.0, 226442899.0, 363206930.0, 586898421.0, 586898421.0, 723532931.0, 612767745.0]}], "direct": [{"name": "Total Direct", "color": "#06b6d4", "vol": [71712.0, 56024.0, 60400.0, 55061.0, 50035.0, 48924.0, 61394.0, 60461.0, 66574.0, 76228.0, 74430.0, 73977.0], "value": [53353876395.01, 45223630900.66, 53087405097.29, 40741587024.11, 35623783916.67, 57442928024.12, 72437330964.53, 59693279244.59, 110622318888.49, 49079261076.67, 63556903970.01, 152629926809.77]}, {"name": "Alipay", "color": "#0ea5e9", "vol": [11744.0, 6623.0, 6497.0, 8661.0, 6118.0, 4530.0, 6455.0, 6218.0, 7416.0, 7927.0, 7019.0, 9107.0], "value": [11727917902.82, 10886765920.0, 10851426974.95, 9394888492.23, 5668377195.0, 9367410788.93, 15381349606.52, 13425378336.14, 27038269550.98, 7051701031.42, 11225273810.46, 32323961984.18]}, {"name": "WeChat", "color": "#22c55e", "vol": [33179.0, 27246.0, 34135.0, 31125.0, 27085.0, 27578.0, 33392.0, 31772.0, 36807.0, 39991.0, 41443.0, 46594.0], "value": [33291132635.19, 26779514913.66, 35713049732.34, 26212935342.88, 24084643782.67, 41995044603.19, 43199138484.01, 38450841001.45, 75496345453.51, 31967391786.25, 43260344582.55, 113986954043.59]}, {"name": "GLN", "color": "#a855f7", "vol": [26789.0, 22155.0, 19768.0, 15275.0, 16832.0, 16816.0, 21547.0, 22471.0, 22351.0, 28310.0, 25968.0, 18276.0], "value": [8334825857.0, 7557350067.0, 6522928390.0, 5133763189.0, 5870762939.0, 6080472632.0, 13856842874.0, 7817059907.0, 8087703884.0, 10060168259.0, 9071285577.0, 6319010782.0]}]}};
+
+/* ── State ── */
+let tab='domestic', metric='vol', mode='compare';
+let selA=0, selB=11;
+let corridor='all';
+let mainChart=null, donutChart=null, ioChart=null;
+
+/* ── Helpers ── */
+function sum(arr){return (arr||[]).reduce((a,v)=>a+(v||0),0);}
+function getVal(arr,m){if(m==='all')return sum(arr);return(arr&&arr[m]!=null)?arr[m]:0;}
+
+function fmt(n,isVal){
+  if(n===null||n===undefined||isNaN(n))return'–';
+  const a=Math.abs(n);
+  if(isVal){
+    if(a>=1e12)return(n/1e12).toFixed(2)+' T';
+    if(a>=1e9)return(n/1e9).toFixed(2)+' B';
+    if(a>=1e6)return(n/1e6).toFixed(2)+' M';
+    return n.toLocaleString();
+  } else {
+    if(a>=1e9)return(n/1e9).toFixed(2)+'B';
+    if(a>=1e6)return(n/1e6).toFixed(2)+'M';
+    if(a>=1e3)return(n/1e3).toFixed(1)+'K';
+    return Math.round(n).toLocaleString();
+  }
+}
+function fmtFull(n,isVal){
+  if(n===null||n===undefined)return'–';
+  return Math.round(n).toLocaleString()+(isVal?' ₭':'');
+}
+function diffBadge(a,b){
+  if(!b||b===0)return'';
+  const g=(a-b)/Math.abs(b)*100;
+  if(isNaN(g))return'';
+  const cls=g>0?'dup':g<0?'ddn':'dneu',arrow=g>0?'▲':g<0?'▼':'–';
+  return`<span class="dbadge ${cls}">${arrow} ${Math.abs(g).toFixed(1)}%</span>`;
+}
+
+function animEl(el,target,isVal){
+  const steps=20,dur=480;let step=0;
+  const iv=setInterval(()=>{
+    step++;const ease=1-Math.pow(1-step/steps,3);
+    el.textContent=fmt(target*ease,isVal);
+    if(step>=steps){el.textContent=fmt(target,isVal);clearInterval(iv);}
+  },dur/steps);
+}
+
+/* ── Setters ── */
+function setTab(t){
+  tab=t;
+  document.getElementById('tab-domestic').className='btn'+(t==='domestic'?' active-blue':'');
+  document.getElementById('tab-crossborder').className='btn'+(t==='crossborder'?' active-blue':'');
+  document.getElementById('cb-extra').style.display=t==='crossborder'?'block':'none';
+  render();
+}
+function setMetric(m){
+  metric=m;
+  document.getElementById('metric-vol').className='btn'+(m==='vol'?' active-purple':'');
+  document.getElementById('metric-value').className='btn'+(m==='value'?' active-purple':'');
+  render();
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('mode-single').className='btn'+(m==='single'?' active-amber':'');
+  document.getElementById('mode-compare').className='btn'+(m==='compare'?' active-amber':'');
+  if(m==='single'){selB=null;}
+  else{if(selB===null)selB=(selA+1)%12;}
+  updatePills();render();
+}
+function setCorridor(c){
+  corridor=c;
+  document.querySelectorAll('.cpill').forEach(b=>b.classList.remove('active'));
+  document.getElementById(c==='all'?'cp-all':'cp-'+c).classList.add('active');
+  buildIOMoMCards();buildIOChart();
+}
+
+/* ── Month pills ── */
+function buildPills(){
+  const mf=document.getElementById('month-filter');
+  mf.innerHTML='';
+  const all=document.createElement('button');
+  all.className='mpill';all.id='m-all';all.textContent='All Year';
+  all.onclick=()=>clickMonth('all');mf.appendChild(all);
+  D.months.forEach((mn,i)=>{
+    const b=document.createElement('button');
+    b.className='mpill';b.id='m-'+i;b.textContent=mn;
+    b.onclick=()=>clickMonth(i);mf.appendChild(b);
+  });
+}
+function clickMonth(i){
+  if(mode==='single'){selA=i;selB=null;}
+  else{
+    if(i==='all'){selA='all';selB=null;setMode('single');return;}
+    if(selA===null){selA=i;}
+    else if(selB===null&&i!==selA){selB=i;}
+    else{selA=i;selB=null;}
+  }
+  updatePills();render();
+}
+function updatePills(){
+  document.querySelectorAll('.mpill').forEach(p=>p.className='mpill');
+  if(mode==='single'){
+    const el=document.getElementById(selA==='all'?'m-all':'m-'+selA);
+    if(el)el.classList.add('sel-a');
+  } else {
+    if(selA!==null&&selA!=='all'){const ea=document.getElementById('m-'+selA);if(ea)ea.classList.add('sel-a');}
+    if(selB!==null){const eb=document.getElementById('m-'+selB);if(eb)eb.classList.add('sel-b');}
+  }
+  const hint=document.getElementById('hint-text');
+  if(mode==='compare'){
+    if(selA!==null&&selB!==null)
+      hint.innerHTML=`Comparing <span style="color:#60a5fa">${D.months[selA]}</span> vs <span style="color:#fbbf24">${D.months[selB]}</span>`;
+    else if(selA!==null)
+      hint.innerHTML=`<span style="color:#60a5fa">${D.months[selA]}</span> selected · Pick Month B`;
+    else hint.innerHTML='Pick Month A';
+  } else {
+    hint.innerHTML=selA==='all'?'Showing Full Year 2025':'Showing '+D.months[selA]+' 2025';
+  }
+}
+
+/* ── KPI ── */
+function renderKPI(){
+  const grid=document.getElementById('kgrid');
+  const isVal=metric==='value',key=metric;
+  const cmp=mode==='compare'&&selA!==null&&selB!==null;
+  function card(name,iconHtml,arr,color,isTotal){
+    const vA=getVal(arr,selA);
+    const vB=cmp?getVal(arr,selB):null;
+    let inner='';
+    if(cmp){
+      inner=`<div class="cmp-row">
+        <div class="cmp-blk"><div class="cmp-m ca">${D.months[selA]}</div>
+          <div class="cmp-v ca" data-target="${vA}" data-isval="${isVal}">${fmt(vA,isVal)}</div></div>
+        <div class="cmp-blk"><div class="cmp-m cb">${D.months[selB]}</div>
+          <div class="cmp-v cb" data-target="${vB}" data-isval="${isVal}">${fmt(vB,isVal)}</div></div>
+      </div>${diffBadge(vB,vA)}`;
+    } else {
+      inner=`<div class="kval" style="${color?'color:'+color:''}" data-target="${vA}" data-isval="${isVal}">${fmt(vA,isVal)}</div>`;
+    }
+    return`<div class="kcard${isTotal?' tot':''}">
+      ${iconHtml}<div class="kname">${name}</div>${inner}</div>`;
+  }
+  let html='';
+  if(tab==='domestic'){
+    html+=card('Total E-Payment Domestic','<div class="kicon">🏦</div>',D.domestic.total[key],null,true);
+    D.domestic.categories.forEach(c=>html+=card(c.name,`<div class="kicon">${c.icon}</div>`,c[key],c.color,false));
+  } else {
+    html+=card('Total Cross-Border (LAPNet)','<div class="kicon">✈️</div>',D.cross_border.total[key],null,true);
+    D.cross_border.corridors.forEach(c=>html+=card(c.name,`<div class="kflags">${c.flags}</div>`,c[key],c.color,false));
+  }
+  grid.innerHTML=html;
+  grid.querySelectorAll('[data-target]').forEach(el=>{
+    const t=parseFloat(el.dataset.target)||0;
+    animEl(el,t,el.dataset.isval==='true');
+  });
+}
+
+/* ── IO summary grid ── */
+function renderIOGrid(){
+  const isVal=metric==='value',key=metric;
+  const cmp=mode==='compare'&&selA!==null&&selB!==null;
+  let html='';
+  D.cross_border.corridors.forEach(c=>{
+    const v=getVal(c[key],selA),inV=getVal(c['in_'+key],selA),outV=getVal(c['out_'+key],selA);
+    const vB=cmp?getVal(c[key],selB):null,inB=cmp?getVal(c['in_'+key],selB):null,outB=cmp?getVal(c['out_'+key],selB):null;
+    html+=`<div class="iocard">
+      <div class="iohdr"><span class="ioflags">${c.flags}</span><span class="ioname">${c.name}</span>
+        <span style="width:7px;height:7px;border-radius:50%;background:${c.color};display:inline-block;margin-left:auto"></span></div>
+      <div class="iorow"><span class="iolabel">Total</span>
+        <span class="ionum cblue">${fmt(v,isVal)}${cmp?` → <span class="camber">${fmt(vB,isVal)}</span>`:''}</span></div>
+      <div class="iorow"><span class="iolabel">▼ Inbound</span>
+        <span class="ionum cgreen">${fmt(inV,isVal)}${cmp?` → <span class="camber">${fmt(inB,isVal)}</span>`:''}</span></div>
+      <div class="iorow"><span class="iolabel">▲ Outbound</span>
+        <span class="ionum camber">${fmt(outV,isVal)}${cmp?` → <span class="camber">${fmt(outB,isVal)}</span>`:''}</span></div>
+    </div>`;
+  });
+  document.getElementById('io-grid').innerHTML=html;
+
+  let html2='';
+  D.cross_border.direct.forEach(d=>{
+    const v=getVal(d[key],selA),vB=cmp?getVal(d[key],selB):null;
+    html2+=`<div class="dcard">
+      <div class="dbrand" style="color:${d.color}">${d.name}</div>
+      <div class="dval">${fmt(v,isVal)}</div>
+      ${cmp?`<div class="dsub camber">${D.months[selB]}: ${fmt(vB,isVal)}</div>`:
+        `<div class="dsub">${isVal?'₭ LAK':'Transactions'}</div>`}
+    </div>`;
+  });
+  document.getElementById('direct-grid').innerHTML=html2;
+}
+
+/* ── IO MoM mini cards ── */
+function buildIOMoMCards(){
+  const isVal=metric==='value',key=metric;
+  let inArr,outArr;
+  if(corridor==='all'){
+    inArr=D.months.map((_,i)=>D.cross_border.corridors.reduce((s,c)=>s+(c['in_'+key][i]||0),0));
+    outArr=D.months.map((_,i)=>D.cross_border.corridors.reduce((s,c)=>s+(c['out_'+key][i]||0),0));
+  } else {
+    const c=D.cross_border.corridors[corridor];
+    inArr=c['in_'+key].map(v=>v||0);
+    outArr=c['out_'+key].map(v=>v||0);
+  }
+  let html='';
+  D.months.forEach((mn,i)=>{
+    const inV=inArr[i],outV=outArr[i],net=inV-outV;
+    const netCls=net>=0?'net-pos':'net-neg';
+    const netSign=net>=0?'+':'';
+    html+=`<div class="iomcard">
+      <div class="iomm">${mn}</div>
+      <div class="iom-in">▼ ${fmt(inV,isVal)}</div>
+      <div class="iom-out">▲ ${fmt(outV,isVal)}</div>
+      <div class="iom-net ${netCls}">Net: ${netSign}${fmt(net,isVal)}</div>
+    </div>`;
+  });
+  document.getElementById('io-mom-cards').innerHTML=html;
+}
+
+/* ── IO MoM Big chart ── */
+function buildIOChart(){
+  const ctx=document.getElementById('ioChart').getContext('2d');
+  if(ioChart){ioChart.destroy();ioChart=null;}
+  const isVal=metric==='value',key=metric;
+  let inArr,outArr,title;
+  if(corridor==='all'){
+    inArr=D.months.map((_,i)=>D.cross_border.corridors.reduce((s,c)=>s+(c['in_'+key][i]||0),0));
+    outArr=D.months.map((_,i)=>D.cross_border.corridors.reduce((s,c)=>s+(c['out_'+key][i]||0),0));
+    title='All Corridors Combined';
+  } else {
+    const c=D.cross_border.corridors[corridor];
+    inArr=c['in_'+key].map(v=>v||0);
+    outArr=c['out_'+key].map(v=>v||0);
+    title=c.name;
+  }
+  const netArr=inArr.map((v,i)=>v-(outArr[i]||0));
+
+  // MoM growth for inbound
+  const inGrowth=inArr.map((v,i)=>{
+    if(i===0)return null;
+    const prev=inArr[i-1];
+    if(!prev)return null;
+    return ((v-prev)/Math.abs(prev)*100);
+  });
+
+  ioChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:D.months,
+      datasets:[
+        {label:'▼ Inbound',data:inArr,backgroundColor:'#10b981bb',borderColor:'#10b981',
+         borderWidth:1,borderRadius:5,order:2},
+        {label:'▲ Outbound',data:outArr,backgroundColor:'#f59e0bbb',borderColor:'#f59e0b',
+         borderWidth:1,borderRadius:5,order:2},
+        {label:'Net Balance',data:netArr,type:'line',borderColor:'#a78bfa',backgroundColor:'transparent',
+         borderWidth:2.5,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#a78bfa',
+         tension:0.35,order:1,yAxisID:'y'},
+        {label:'Inbound MoM %',data:inGrowth,type:'line',borderColor:'#f472b6',backgroundColor:'transparent',
+         borderWidth:1.5,borderDash:[4,3],pointRadius:3,pointHoverRadius:6,
+         pointBackgroundColor:'#f472b6',tension:0.3,order:1,yAxisID:'y2'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:title+' — Inbound vs Outbound MoM',
+               color:'#94a3b8',font:{size:12,weight:'bold'},padding:{bottom:10}},
+        legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10,usePointStyle:true}},
+        tooltip:{backgroundColor:'#1e2535',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+          titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:11,
+          callbacks:{label:ctx=>{
+            if(ctx.dataset.label==='Inbound MoM %')
+              return'  '+ctx.dataset.label+': '+(ctx.raw!==null?ctx.raw.toFixed(1)+'%':'–');
+            return'  '+ctx.dataset.label+': '+fmtFull(ctx.raw,isVal);
+          }}}
+      },
+      scales:{
+        x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,.03)'}},
+        y:{ticks:{color:'#64748b',callback:v=>fmt(v,isVal)},grid:{color:'rgba(255,255,255,.05)'},
+           title:{display:true,text:isVal?'Value (LAK)':'Transactions',color:'#475569',font:{size:10}}},
+        y2:{position:'right',ticks:{color:'#f472b6',callback:v=>v!==null?v.toFixed(1)+'%':''},
+            grid:{display:false},
+            title:{display:true,text:'MoM Growth %',color:'#f472b6',font:{size:10}}}
+      }
+    }
+  });
+}
+
+/* ── Main charts ── */
+function buildMainChart(){
+  const ctx=document.getElementById('mainChart').getContext('2d');
+  if(mainChart){mainChart.destroy();mainChart=null;}
+  const key=metric,isVal=metric==='value';
+  const cmp=mode==='compare'&&selA!==null&&selB!==null;
+  const cats=tab==='domestic'?D.domestic.categories:D.cross_border.corridors;
+  let datasets=[];
+
+  if(cmp){
+    cats.forEach(cat=>{
+      datasets.push({label:cat.name+' ('+D.months[selA]+')',
+        data:cat[key].map((v,i)=>i===selA?(v||0):null),
+        backgroundColor:cat.color+'cc',borderColor:cat.color,borderWidth:1,borderRadius:5});
+      datasets.push({label:cat.name+' ('+D.months[selB]+')',
+        data:cat[key].map((v,i)=>i===selB?(v||0):null),
+        backgroundColor:cat.color+'44',borderColor:cat.color+'88',borderWidth:1,borderRadius:5});
+    });
+    document.getElementById('main-chart-title').textContent=D.months[selA]+' vs '+D.months[selB];
+  } else {
+    const s=selA;
+    cats.forEach(cat=>{
+      datasets.push({label:cat.name,data:cat[key].map(v=>v||0),
+        backgroundColor:cat[key].map((_,i)=>s==='all'?cat.color+'bb':i===s?cat.color+'ee':cat.color+'22'),
+        borderColor:cat.color,borderWidth:1,borderRadius:4});
+    });
+    document.getElementById('main-chart-title').textContent=
+      tab==='domestic'?'Monthly Domestic Trend':'Monthly Cross-Border Trend';
+  }
+
+  mainChart=new Chart(ctx,{type:'bar',data:{labels:D.months,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:9,usePointStyle:true}},
+      tooltip:{backgroundColor:'#1e2535',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+        titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:11,
+        callbacks:{label:ctx=>'  '+ctx.dataset.label+': '+fmtFull(ctx.raw,isVal)}}
+    },
+    scales:{
+      x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,.03)'}},
+      y:{ticks:{color:'#64748b',callback:v=>fmt(v,isVal)},grid:{color:'rgba(255,255,255,.05)'}}
+    }
+  }});
+}
+
+function buildDonutChart(){
+  const ctx=document.getElementById('donutChart').getContext('2d');
+  if(donutChart){donutChart.destroy();donutChart=null;}
+  const key=metric,isVal=metric==='value';
+  const cmp=mode==='compare'&&selA!==null&&selB!==null;
+  const cats=tab==='domestic'?D.domestic.categories:D.cross_border.corridors;
+  const labels=[],dataA=[],dataB=[],colors=[];
+  cats.forEach(c=>{labels.push(c.name);dataA.push(getVal(c[key],selA)||0);
+    if(cmp)dataB.push(getVal(c[key],selB)||0);colors.push(c.color);});
+
+  const ds=cmp?[
+    {label:D.months[selA],data:dataA,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,hoverOffset:10},
+    {label:D.months[selB],data:dataB,backgroundColor:colors.map(c=>c+'44'),borderColor:colors.map(c=>c+'88'),borderWidth:1,hoverOffset:10},
+  ]:[{data:dataA,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,hoverOffset:12}];
+
+  document.getElementById('donut-title').textContent=cmp?
+    D.months[selA]+' vs '+D.months[selB]:'Breakdown · '+(selA==='all'?'Full Year':D.months[selA]);
+
+  donutChart=new Chart(ctx,{type:'doughnut',data:{labels,datasets:ds},options:{
+    responsive:true,maintainAspectRatio:false,cutout:cmp?'55%':'65%',
+    plugins:{
+      legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},padding:8,boxWidth:9,usePointStyle:true}},
+      tooltip:{backgroundColor:'#1e2535',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+        titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:10,
+        callbacks:{label:ctx=>{
+          const total=ctx.dataset.data.reduce((a,b)=>a+(b||0),0);
+          const p=total>0?(ctx.raw/total*100).toFixed(1):0;
+          return'  '+ctx.label+': '+fmt(ctx.raw,isVal)+' ('+p+'%)';
+        }}}
+    }
+  }});
+}
+
+/* ── Master render ── */
+function render(){
+  renderKPI();
+  buildMainChart();
+  buildDonutChart();
+  if(tab==='crossborder'){
+    renderIOGrid();
+    buildIOMoMCards();
+    buildIOChart();
+  }
+}
+
+buildPills();updatePills();render();
+</script>
+</body></html>
